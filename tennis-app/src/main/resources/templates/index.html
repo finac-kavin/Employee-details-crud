@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My first Vue page</title>
+    <style>
+        <!--        #app {-->
+        <!--            display: inline-block;-->
+        <!--            padding: 10px;-->
+        <!--            font-size: x-large;-->
+        <!--            background-color: lightgreen;-->
+        <!--        }-->
+    </style>
+
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Separated link</a>
+                        </div>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-sm-2" type="search" placeholder="Search">
+                    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    {{ message }} {{ name }}
+
+    <div class="card" id="userRegistration">
+        <div class="card-header">User Registration</div>
+        <div class="card-body">
+            <form @submit.prevent="saveData">
+                <label>Id</label>
+                <input type="text" v-model="employee.id" name="id" id="id" class="form-control"/>
+
+                <label>Employee Id</label>
+                <input type="text" v-model="employee.employeeId" name="employeeId" id="employeeId" class="form-control"/>
+
+                <label>Age</label>
+                <input type="text" v-model="employee.age" name="age" id="age" class="form-control"/>
+
+                <label>First Name</label>
+                <input type="text" v-model="employee.firstName" name="firstName" id="firstName" class="form-control"/>
+
+                <label>Last Name</label>
+                <input type="text" v-model="employee.lastName" name="lastName" id="lastName" class="form-control"/>
+
+                <input type="submit" value="Save" class="btn btn-success">
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="card-header">Customer View</div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Employee ID</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Option</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="employee in result" :key="employee.id">
+                    <td>{{ employee.id }}</td>
+                    <td>{{ employee.employeeId }}</td>
+                    <td>{{ employee.age}}</td>
+                    <td>{{ employee.firstName }}</td>
+                    <td>{{ employee.lastName }}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning" @click="edit(employee)">Edit</button>
+                        <button type="button" class="btn btn-danger" @click="remove(employee)">Delete</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    <!--    import Vue from 'vue';-->
+    <!--    import axios from 'axios';-->
+
+    <!--        const Navbar = {-->
+    <!--            template: '#navbar-template'-->
+    <!--        };-->
+        const app = Vue.createApp({
+<!--            components: {-->
+<!--                'navbar': Navbar-->
+<!--            },-->
+            data() {
+                return {
+                    result: {},
+                    message: "Hello World! makkalae",
+                    employee: {
+                        id: '',
+                        age: '',
+                        firstName: '',
+                        lastName: ''
+                    }
+                }
+            },
+            created() {
+                this.EmployeereLoad();
+            },
+            mounted() {
+                console.log("mounted() called.....");
+            },
+            methods: {
+
+                EmployeereLoad()
+                {
+                    console.log("Datas in view");
+                    var page = "http://localhost:8080/employees/list";
+                    axios.get(page)
+                    .then(
+                        ({data}) => {
+                            this.employee.id = '';
+                            this.employee.employeeId = '';
+                            this.employee.age = '';
+                            console.log("Data fetched:", data);
+                            this.result = data;
+                        })
+                        .catch(error => {
+                            console.error("Error fetching data:", error);
+                        });
+                },
+
+                save()
+                {
+                    if(this.employee.id == '')
+                    {
+                        this.saveData();
+                    }
+                    else
+                    {
+                        this.updateData();
+                    }
+                },
+
+                saveData()
+                {
+                    console.log("Calling save method");
+                    axios.post("http://localhost:8080/employees/create", this.employee)
+                    .then(
+                        ({data}) => {
+                            alert("Saved Successfully");
+                            this.employee.id = '';
+                            this.employee.employeeId = '';
+                            this.employee.age = '';
+                            this.employee.firstName = '';
+                            this.employee.lastName = '';
+                            this.EmployeereLoad();
+                        }
+                    )
+                },
+
+                edit(employee) {
+                    this.employee = employee;
+                },
+
+                updateData()
+                {
+                    var editrecords = "http://localhost:8080/employees/";
+                    axios.put(editrecords, this.employee)
+                    .then(
+                        ({data}) => {
+                            this.employee.id = '';
+                            this.employee.employeeId = '';
+                            this.employee.age = '';
+                            this.employee.firstName = '';
+                            this.employee.lastName = ''
+                            this.id = ''
+                            alert("Updated..");
+                            this.EmployeereLoad();
+                        }
+                    );
+                },
+
+                remove(employee)
+                {
+                    console.log("Check delete");
+                    var url = `http://localhost:8080/employees/delete/${employee.id}`;
+                    axios.delete(url)
+                    .then(response => {
+                        console.log("Delete successful", response);
+                        alert("Deleted");
+                        this.EmployeereLoad();  // Ensure this function is properly defined and bound
+                    })
+                    .catch(error => {
+                        console.error("There was an error deleting the employee!", error);
+                        alert("Failed to delete. Please try again.");
+                    });
+                }
+            }
+        });
+
+        app.mount('#app');
+</script>
+
+</body>
+</html>
